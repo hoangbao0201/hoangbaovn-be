@@ -1,0 +1,108 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Role {
+  roleId   Int    @id @default(autoincrement())
+  roleName String @unique
+  users    User[]
+}
+
+model User {
+  userId      Int      @id @default(autoincrement())
+  name        String
+  username    String   @unique
+  email       String   @unique
+  password    String?
+  description String?
+  rank        Int      @default(0)
+  candy       Int?     @default(100)
+  roleId      Int?
+  avatarUrl   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  role      Role?      @relation(fields: [roleId], references: [roleId])
+  blogs     Blog[]
+  UserLikes UserLike[]
+  UserSaves UserSave[]
+  UserViews UserView[]
+}
+
+model Blog {
+  blogId       Int      @id @default(autoincrement())
+  authorId     Int
+  title        String   @db.VarChar(100)
+  slug         String   @unique @db.VarChar(100)
+  summary      String   @db.Text
+  published    Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  content      String   @db.Text
+  thumbnailUrl String?
+  views        Int      @default(0)
+  likes        Int      @default(0)
+  saves        Int      @default(0)
+
+  author    User       @relation(fields: [authorId], references: [userId])
+  blogTags  BlogTag[]
+  UserLikes UserLike[]
+  UserSaves UserSave[]
+  UserViews UserView[]
+}
+
+model BlogTag {
+  blogTagId Int @id @default(autoincrement())
+  blogId    Int
+  tagId     Int
+
+  blog Blog @relation(fields: [blogId], references: [blogId])
+  tags Tag  @relation(fields: [tagId], references: [tagId])
+}
+
+model Tag {
+  tagId Int    @id @default(autoincrement())
+  name  String @db.VarChar(100)
+  slug  String @db.VarChar(100)
+
+  blogTags BlogTag[]
+}
+
+model UserView {
+  userViewId  Int      @id @default(autoincrement())
+  userId      Int?
+  blogId      Int
+  name        String?
+  address     String?
+  deviceBrand String?
+  createdAt   DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [userId])
+  blog Blog  @relation(fields: [blogId], references: [blogId])
+}
+
+model UserLike {
+  userLikeId Int @id @default(autoincrement())
+  userId     Int
+  blogId     Int
+
+  user User @relation(fields: [userId], references: [userId])
+  blog Blog @relation(fields: [blogId], references: [blogId])
+}
+
+model UserSave {
+  userSaveId Int @id @default(autoincrement())
+  userId     Int
+  blogId     Int
+
+  user User @relation(fields: [userId], references: [userId])
+  blog Blog @relation(fields: [blogId], references: [blogId])
+}
