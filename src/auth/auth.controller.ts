@@ -1,6 +1,8 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDTO, RegisterDTO } from './dto/auth.dto';
+import { User } from '@prisma/client';
+import { RefreshJwtGuard } from './guard/refresh.guard';
 
 @Controller('/api/auth')
 export class AuthController {
@@ -16,5 +18,12 @@ export class AuthController {
     @Post('/login')
     login(@Body() body: LoginDTO) {
         return this.authService.login(body);
+    }
+
+    // POST .../auth/refresh
+    @UseGuards(RefreshJwtGuard)
+    @Post('/refresh')
+    refreshToken(@Request() req) {
+        return this.authService.refreshToken(req.user);
     }
 }

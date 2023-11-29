@@ -1,10 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PrismaService } from '../prisma/prisma.service';
 
-import * as argon from "argon2"
+import * as argon from 'argon2';
+import { User } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
+import { UserService } from '../user/user.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { LoginDTO, RegisterDTO } from './dto/auth.dto';
+
+const EXPIRE_TIME = 20 * 1000;
 
 
 @Injectable()
@@ -13,10 +17,10 @@ export class AuthService {
         private prismaService: PrismaService,
         private configService: ConfigService,
         private jwtService: JwtService,
+        private userService: UserService,
     ) {}
 
     async register(authDTO: RegisterDTO) {
-        
         try {
             const hashPassword = await argon.hash(authDTO.password);
 
@@ -26,7 +30,7 @@ export class AuthService {
                     username: authDTO.username,
                     email: authDTO.email,
                     password: hashPassword,
-                    roleId: 3
+                    roleId: 3,
                 },
                 select: {
                     name: true,
@@ -34,86 +38,90 @@ export class AuthService {
                     username: true,
                     createdAt: true,
                     updatedAt: true,
-                    password: false
-                }
-            })
+                    password: false,
+                },
+            });
 
             return {
                 message: `Regiter user successfully`,
-                users: user
-            }
+                users: user,
+            };
         } catch (error) {
-            if(error.code === "P2002") {
+            if (error.code === 'P2002') {
                 // throw new ForbiddenException(error.message);
                 // throw new ForbiddenException("Error in credentials");
                 return {
                     success: false,
-                    message: "Error in credentials"
-                }
+                    message: 'Error in credentials',
+                };
             }
             return {
                 success: false,
-                error: error
-            }
+                error: error,
+            };
         }
     }
 
     async login(authDTO: LoginDTO) {
-
         try {
-            const user = await this.prismaService.user.findFirst({
-                where: {
-                    email: authDTO.email
+            const user = await this.validateUser(authDTO);
+            const payload = {
+                userId: user.userId,
+                username: user.username
+            };
+            return {
+                user,
+                backendTokens: {
+                    accessToken: await this.jwtService.signAsync(payload, {
+                        expiresIn: '1h',
+                        secret: this.configService.get('TOKEN_SETCRET'),
+                    }),
+                    refreshToken: await this.jwtService.signAsync(payload, {
+                        expiresIn: '7d',
+                        secret: this.configService.get('REFRESH_TOKEN_SETCRET'),
+                    }),
+                    expiresIn: new Date().setTime(new Date().getTime() + EXPIRE_TIME),
                 },
-                select: {
-                    userId: true,
-                    email: true,
-                    password: true
-                }
-            });
-            if(!user) {
-                return {
-                    success: false,
-                    message: "Incorrect account or password"
-                }
-            }
-    
-            // Check password
-            const checkPassword = await argon.verify(user.password, authDTO.password);
-            if(!checkPassword) {
-                return {
-                    success: false,
-                    message: "Incorrect account or password"
-                }
-            }
-    
-            // JWT
-            delete user.password
-    
-            return await this.signJwtToken(user.userId, authDTO.email);
-
+            };
         } catch (error) {
             return {
                 success: false,
-                error: error
-            }
+                error: error,
+            };
         }
-
     }
 
-    //now convert to an object, not string
-    async signJwtToken(userId: number, email: string): Promise<{success: boolean, accessToken: string}>{
-        const payload = {
-            sub: userId,
-            email
+    async validateUser(dto: LoginDTO) {
+        const user = await this.userService.findByEmail(dto.email);
+
+        const checkPassword = await argon.verify(
+            user.password,
+            dto.password,
+        );
+        if (user && checkPassword) {
+            delete user.password;
+            return user;
         }
-        const jwtString = await this.jwtService.signAsync(payload, {
-            expiresIn: '1h',
-            secret: this.configService.get('TOKEN_SETCRET')
-        })
+        throw new UnauthorizedException();
+    }
+
+    async refreshToken(user: { userId: number, username: string }) {
+        const payload = {
+            userId: user.userId,
+            username: user.username
+        };
+
         return {
             success: true,
-            accessToken: jwtString,
-        }
+            accessToken: await this.jwtService.signAsync(payload, {
+                expiresIn: '1h',
+                secret: this.configService.get('TOKEN_SETCRET'),
+            }),
+            refreshToken: await this.jwtService.signAsync(payload, {
+                expiresIn: '7d',
+                secret: this.configService.get('REFRESH_TOKEN_SETCRET'),
+            }),
+            expiresIn: new Date().setTime(new Date().getTime() + EXPIRE_TIME),
+        };
     }
 }

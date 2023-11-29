@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["selectRelationCount"]
 }
 
 datasource db {
@@ -32,9 +33,9 @@ model User {
 
   role      Role?      @relation(fields: [roleId], references: [roleId])
   blogs     Blog[]
-  UserLikes UserLike[]
-  UserSaves UserSave[]
-  UserViews UserView[]
+  userLikes UserLike[]
+  userSaves UserSave[]
+  userViews UserView[]
 }
 
 model Blog {
@@ -54,9 +55,9 @@ model Blog {
 
   author    User       @relation(fields: [authorId], references: [userId])
   blogTags  BlogTag[]
-  UserLikes UserLike[]
-  UserSaves UserSave[]
-  UserViews UserView[]
+  userLikes UserLike[]
+  userSaves UserSave[]
+  userViews UserView[]
 }
 
 model BlogTag {
@@ -70,8 +71,8 @@ model BlogTag {
 
 model Tag {
   tagId Int    @id @default(autoincrement())
-  name  String @db.VarChar(100)
-  slug  String @db.VarChar(100)
+  name  String @db.VarChar(100) @unique
+  slug  String @db.VarChar(100) @unique
 
   blogTags BlogTag[]
 }
@@ -80,7 +81,6 @@ model UserView {
   userViewId  Int      @id @default(autoincrement())
   userId      Int?
   blogId      Int
-  name        String?
   address     String?
   deviceBrand String?
   createdAt   DateTime @default(now())

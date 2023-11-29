@@ -8,6 +8,9 @@ import { AppController } from './app.controller';
 import { AuthController } from './auth/auth.controller';
 import { AuthService } from './auth/auth.service';
 import { UserModule } from './user/user.module';
+import { BlogModule } from './blog/blog.module';
+import { TagModule } from './tag/tag.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -17,6 +20,9 @@ import { UserModule } from './user/user.module';
     AuthModule,
     PrismaModule,
     UserModule,
+    BlogModule,
+    TagModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],

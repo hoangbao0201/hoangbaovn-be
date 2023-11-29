@@ -9,7 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 
 @Injectable()
-export class JwtGuard implements CanActivate {
+export class RefreshJwtGuard implements CanActivate {
     constructor(
         private jwtService: JwtService,
         private configService: ConfigService,
@@ -22,17 +22,18 @@ export class JwtGuard implements CanActivate {
 
         try {
             const payload = await this.jwtService.verifyAsync(token, {
-                secret: this.configService.get('TOKEN_SETCRET'),
+                secret: this.configService.get('REFRESH_TOKEN_SETCRET'),
             });
             request['user'] = payload;
         } catch {
             throw new UnauthorizedException();
         }
+
         return true;
     }
 
     private extractTokenFromHeader(request: Request) {
         const [type, token] = request.headers.authorization?.split(' ') ?? [];
-        return type === 'Bearer' ? token : undefined;
+        return type === 'Refresh' ? token : undefined;
     }
 }
