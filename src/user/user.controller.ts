@@ -1,5 +1,5 @@
 import {
-  Controller
+  Controller, Get, Param
 } from '@nestjs/common';
 import { UserService } from './user.service';
 
@@ -14,10 +14,10 @@ export class UserController {
   //   return user;
   // }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.userService.findOne(+id);
-  // }
+  @Get(':username')
+  findOne(@Param('username') username: string) {
+    return this.userService.userDetail(username); 
+  }
 
   // @Patch(':id')
   // update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {

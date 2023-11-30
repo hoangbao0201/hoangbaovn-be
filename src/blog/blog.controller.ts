@@ -20,12 +20,13 @@ export class BlogController {
   @Get()
   findAll(
     @Query('search') search: string,
+    @Query('byu') byu: string,
     @Query('tag') tag: string,
     @Query('take') take: number,
     @Query('skip') skip: number,
     @Query('sort') sort: "desc" | "asc",
   ) {
-    return this.blogService.findAll({search, tag, take, skip, sort });
+    return this.blogService.findAll({search, byu, tag, take, skip, sort });
   }
 
   @Get('/search')

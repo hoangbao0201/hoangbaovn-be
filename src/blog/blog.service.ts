@@ -7,284 +7,329 @@ import { ViewBlogDto } from './dto/view-blog.dto';
 
 @Injectable()
 export class BlogService {
-  constructor(private prismaService: PrismaService) {}
+    constructor(private prismaService: PrismaService) {}
 
-  async create(userId: number, createBlogDto: CreateBlogDto) {
-    const { title, slug, summary, published, content, thumbnailUrl, blogTags } =
-      createBlogDto;
-    try {
-      const blog = await this.prismaService.blog.create({
-        data: {
-          authorId: userId,
-          title: title,
-          slug: slug,
-          summary: summary,
-          content: content,
-          published: true,
-          thumbnailUrl: thumbnailUrl,
-          blogTags: {
-            create: blogTags.map(tag => ({
-              tags: {
-                connectOrCreate: {
-                  where: {
-                    slug: tag.slug
-                  },
-                  create: {
-                    name: tag.name,
-                    slug: tag.slug
-                  }
-                }
-              }
-            })),
-          },
-        },
-      });
-      return {
-        success: true,
-        blog: blog,
-        userId: userId || "Không có"
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error
-      }
+    async create(userId: number, createBlogDto: CreateBlogDto) {
+        const {
+            title,
+            slug,
+            summary,
+            published,
+            content,
+            thumbnailUrl,
+            blogTags,
+        } = createBlogDto;
+        try {
+            const blog = await this.prismaService.blog.create({
+                data: {
+                    authorId: userId,
+                    title: title,
+                    slug: slug,
+                    summary: summary,
+                    content: content,
+                    published: true,
+                    thumbnailUrl: thumbnailUrl,
+                    blogTags: {
+                        create: blogTags.map((tag) => ({
+                            tags: {
+                                connectOrCreate: {
+                                    where: {
+                                        slug: tag.slug,
+                                    },
+                                    create: {
+                                        name: tag.name,
+                                        slug: tag.slug,
+                                    },
+                                },
+                            },
+                        })),
+                    },
+                },
+            });
+            return {
+                success: true,
+                blog: blog,
+                userId: userId || 'Không có',
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error,
+            };
+        }
     }
-  }
 
-  async findAll(options: { search?:string, tag?: string, take?: number, skip?: number, sort?: "desc" | "asc" }) {
+    async findAll(options: {
+        search?: string;
+        byu?: string;
+        tag?: string;
+        take?: number;
+        skip?: number;
+        sort?: 'desc' | 'asc';
+    }) {
+        const {
+            search = '',
+            byu = '',
+            tag,
+            take = 10,
+            skip = 0,
+            sort = 'desc',
+        } = options;
 
-    const { search = "", tag, take = 10, skip = 0, sort = "desc" } = options;
-
-    try {
-      const where : Prisma.BlogWhereInput = tag
-      ? {
-          blogTags: {
-            some: {
-              tags: {
-                slug: tag
-              }
+        try {
+            let where: Prisma.BlogWhereInput = {};
+            if (tag != "") {
+                where = {
+                    ...where,
+                    blogTags: {
+                        some: {
+                            tags: {
+                                slug: tag
+                            }
+                        }
+                    }
+                };
             }
-          }
-        }
-      : {
-        title: {
-          contains: search
-        }
-      };
-      const blogs = await this.prismaService.blog.findMany({
-        skip: +skip,
-        take: +take,
-        where: where,
-        select: {
-          blogId: true,
-          slug: true,
-          title: true,
-          summary: true,
-          thumbnailUrl: true,
-          createdAt: true,
-          updatedAt: true,
-          blogTags: {
-            select: {
-              tags: {
+            if (search != "") {
+                where = {
+                    ...where,
+                    title: {
+                        contains: search,
+                    },
+                };
+            }
+            if (byu != "") {
+                where = {
+                    ...where,
+                    author: {
+                        username: byu
+                    }
+                };
+            }
+
+            const blogs = await this.prismaService.blog.findMany({
+                skip: +skip,
+                take: +take,
+                where: where,
                 select: {
-                  name: true,
-                  slug: true,
-                }
-              }
-            }
-          },
-          author: {
-            select: {
-              role: true,
-              userId: true,
-              name: true,
-              username: true,
-              email: true,
-              rank: true,
-            }
-          },
-          _count: {
-            select: {
-              userViews: true,
-              userLikes: true,
-              userSaves: true,
-            }
-          },
-        },
-        orderBy: {
-          createdAt: sort
+                    blogId: true,
+                    slug: true,
+                    title: true,
+                    summary: true,
+                    thumbnailUrl: true,
+                    createdAt: true,
+                    updatedAt: true,
+                    blogTags: {
+                        select: {
+                            tags: {
+                                select: {
+                                    name: true,
+                                    slug: true,
+                                },
+                            },
+                        },
+                    },
+                    author: {
+                        select: {
+                            role: true,
+                            userId: true,
+                            name: true,
+                            username: true,
+                            email: true,
+                            rank: true,
+                        },
+                    },
+                    _count: {
+                        select: {
+                            userViews: true,
+                            userLikes: true,
+                            userSaves: true,
+                        },
+                    },
+                },
+                orderBy: {
+                    createdAt: sort,
+                },
+            });
+            return {
+                success: true,
+                blogs: blogs || null,
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error,
+            };
         }
-      })
-      return {
-        success: true,
-        blogs: blogs || null
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error
-      }
     }
-  }
 
-  async searchBlogs(options: { search?:string, tag?: string, take?: number, skip?: number, sort?: "desc" | "asc" }) {
+    async searchBlogs(options: {
+        search?: string;
+        tag?: string;
+        take?: number;
+        skip?: number;
+        sort?: 'desc' | 'asc';
+    }) {
+        const {
+            search = '',
+            tag,
+            take = 10,
+            skip = 0,
+            sort = 'desc',
+        } = options;
 
-    const { search = "", tag, take = 10, skip = 0, sort = "desc" } = options;
-
-    try {
-      const blogs = await this.prismaService.blog.findMany({
-        skip: +skip,
-        take: +take,
-        where: {
-          title: {
-            contains: search
-          }
-        },
-        select: {
-          blogId: true,
-          slug: true,
-          title: true,
-          thumbnailUrl: true,
-          createdAt: true,
-          updatedAt: true,
-          blogTags: {
-            select: {
-              tags: {
+        try {
+            const blogs = await this.prismaService.blog.findMany({
+                skip: +skip,
+                take: +take,
+                where: {
+                    title: {
+                        contains: search,
+                    },
+                },
                 select: {
-                  name: true,
-                  slug: true,
-                }
-              }
-            }
-          },
-          author: {
-            select: {
-              role: true,
-              userId: true,
-              name: true,
-              username: true,
-            }
-          },
-        },
-        orderBy: {
-          createdAt: sort
+                    blogId: true,
+                    slug: true,
+                    title: true,
+                    thumbnailUrl: true,
+                    createdAt: true,
+                    updatedAt: true,
+                    blogTags: {
+                        select: {
+                            tags: {
+                                select: {
+                                    name: true,
+                                    slug: true,
+                                },
+                            },
+                        },
+                    },
+                    author: {
+                        select: {
+                            role: true,
+                            userId: true,
+                            name: true,
+                            username: true,
+                        },
+                    },
+                },
+                orderBy: {
+                    createdAt: sort,
+                },
+            });
+            return {
+                success: true,
+                blogs: blogs || null,
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error,
+            };
         }
-      })
-      return {
-        success: true,
-        blogs: blogs || null
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error
-      }
     }
-  }
 
-  async findOne(slug?: string) {
-    try {
-      const cvSlug = slug.substring(0, slug.lastIndexOf("-"));
-      const cvBlogId = slug.substring(slug.lastIndexOf("-") + 1);
+    async findOne(slug?: string) {
+        try {
+            const cvSlug = slug.substring(0, slug.lastIndexOf('-'));
+            const cvBlogId = slug.substring(slug.lastIndexOf('-') + 1);
 
-      const blog = await this.prismaService.blog.findUnique({
-        where: {
-          blogId: Number(cvBlogId),
-          slug: cvSlug,
-        },
-        select: {
-          blogId: true,
-          slug: true,
-          title: true,
-          summary: true,
-          content: true,
-          thumbnailUrl: true,
-          createdAt: true,
-          updatedAt: true,
-          blogTags: {
-            select: {
-              tags: {
+            const blog = await this.prismaService.blog.findUnique({
+                where: {
+                    blogId: Number(cvBlogId),
+                    slug: cvSlug,
+                },
                 select: {
-                  name: true,
-                  slug: true,
-                }
-              }
-            }
-          },
-          author: {
-            select: {
-              role: true,
-              userId: true,
-              name: true,
-              username: true,
-              email: true,
-              rank: true,
-            }
-          },
-          _count: {
-            select: {
-              userViews: true,
-              userLikes: true,
-              userSaves: true,
-            }
-          },
+                    blogId: true,
+                    slug: true,
+                    title: true,
+                    summary: true,
+                    content: true,
+                    thumbnailUrl: true,
+                    createdAt: true,
+                    updatedAt: true,
+                    blogTags: {
+                        select: {
+                            tags: {
+                                select: {
+                                    name: true,
+                                    slug: true,
+                                },
+                            },
+                        },
+                    },
+                    author: {
+                        select: {
+                            role: true,
+                            userId: true,
+                            name: true,
+                            username: true,
+                            email: true,
+                            rank: true,
+                        },
+                    },
+                    _count: {
+                        select: {
+                            userViews: true,
+                            userLikes: true,
+                            userSaves: true,
+                        },
+                    },
+                },
+            });
+
+            return {
+                success: true,
+                blog: blog,
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error,
+            };
         }
-      });
-
-      return {
-        success: true,
-        blog: blog
-      }
-    } catch (error) {
-      return {
-        success: false,
-        error: error
-      }
     }
-  }
 
-  update(id: number, updateBlogDto: UpdateBlogDto) {
-    return `This action updates a #${id} blog`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} blog`;
-  }
-
-  async increaseViews(id: number, ip, request: Request) {
-    try {
-      if(!id) {
-        const increaseView = await this.prismaService.userView.create({
-          data: {
-            userId: 1,
-            blogId: id,
-            address: ip,
-            deviceBrand: request.headers['user-agent'],
-          }
-        });
-        return {
-          success: true,
-        };
-      }
-      else {
-        const increaseView = await this.prismaService.userView.create({
-          data: {
-            userId: 1,
-            blogId: id,
-            address: ip,
-            deviceBrand: request.headers['user-agent'],
-          }
-        });
-        return {
-          success: true,
-        };
-      }
-    } catch (error) {
-      return {
-        success: false,
-        error: error
-      }
+    update(id: number, updateBlogDto: UpdateBlogDto) {
+        return `This action updates a #${id} blog`;
     }
-  }
+
+    remove(id: number) {
+        return `This action removes a #${id} blog`;
+    }
+
+    async increaseViews(id: number, ip, request: Request) {
+        try {
+            if (!id) {
+                const increaseView = await this.prismaService.userView.create({
+                    data: {
+                        userId: 1,
+                        blogId: id,
+                        address: ip,
+                        deviceBrand: request.headers['user-agent'],
+                    },
+                });
+                return {
+                    success: true,
+                };
+            } else {
+                const increaseView = await this.prismaService.userView.create({
+                    data: {
+                        userId: 1,
+                        blogId: id,
+                        address: ip,
+                        deviceBrand: request.headers['user-agent'],
+                    },
+                });
+                return {
+                    success: true,
+                };
+            }
+        } catch (error) {
+            return {
+                success: false,
+                error: error,
+            };
+        }
+    }
 }
