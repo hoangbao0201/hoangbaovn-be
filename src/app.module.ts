@@ -11,6 +11,7 @@ import { UserModule } from './user/user.module';
 import { BlogModule } from './blog/blog.module';
 import { TagModule } from './tag/tag.module';
 import { AdminModule } from './admin/admin.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { AdminModule } from './admin/admin.module';
     BlogModule,
     TagModule,
     AdminModule,
+    CloudinaryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
