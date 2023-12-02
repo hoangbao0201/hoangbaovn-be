@@ -2,7 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["selectRelationCount"]
 }
 
@@ -53,11 +53,19 @@ model Blog {
   likes        Int      @default(0)
   saves        Int      @default(0)
 
-  author    User       @relation(fields: [authorId], references: [userId])
-  blogTags  BlogTag[]
-  userLikes UserLike[]
-  userSaves UserSave[]
-  userViews UserView[]
+  author     User        @relation(fields: [authorId], references: [userId])
+  blogTags   BlogTag[]
+  userLikes  UserLike[]
+  userSaves  UserSave[]
+  userViews  UserView[]
+  blogImages BlogImage[]
+}
+
+model BlogImage {
+  blogImageId Int    @id @default(autoincrement())
+  blogId      Int
+  urlImage    String @db.VarChar(200)
+  blog        Blog   @relation(fields: [blogId], references: [blogId])
 }
 
 model BlogTag {
@@ -71,8 +79,8 @@ model BlogTag {
 
 model Tag {
   tagId Int    @id @default(autoincrement())
-  name  String @db.VarChar(100) @unique
-  slug  String @db.VarChar(100) @unique
+  name  String @unique @db.VarChar(100)
+  slug  String @unique @db.VarChar(100)
 
   blogTags BlogTag[]
 }

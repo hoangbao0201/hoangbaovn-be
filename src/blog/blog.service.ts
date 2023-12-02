@@ -258,6 +258,12 @@ export class BlogService {
                             },
                         },
                     },
+                    blogImages: {
+                        select: {
+                            blogImageId: true,
+                            urlImage: true
+                        }
+                    },
                     author: {
                         select: {
                             role: true,
