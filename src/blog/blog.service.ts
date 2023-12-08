@@ -362,6 +362,62 @@ export class BlogService {
         }
     }
 
+    async editBlog(userId: number, blogId: number, updateBlogDto: UpdateBlogDto) {
+        const {
+            title,
+            slug,
+            summary,
+            published,
+            content,
+            thumbnailUrl,
+            blogTags,
+        } = updateBlogDto;
+
+        try {
+            const blog = await this.prismaService.blog.update({
+                where: {
+                    blogId: Number(blogId),
+                    author: {
+                        userId: userId
+                    }
+                },
+                data: {
+                    title,
+                    slug,
+                    summary,
+                    published,
+                    content,
+                    thumbnailUrl,
+                    blogTags: {
+                        create: blogTags.map((tag) => ({
+                            tags: {
+                                connectOrCreate: {
+                                    where: {
+                                        slug: tag.slug,
+                                    },
+                                    create: {
+                                        name: tag.name,
+                                        slug: tag.slug,
+                                    },
+                                },
+                            },
+                        })),
+                    },
+                }
+            });
+
+            return {
+                success: true,
+                blog: blog,
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error,
+            };
+        }
+    }
+
     update(id: number, updateBlogDto: UpdateBlogDto) {
         return `This action updates a #${id} blog`;
     }

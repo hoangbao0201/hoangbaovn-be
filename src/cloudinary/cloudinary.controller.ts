@@ -21,8 +21,9 @@ export class CloudinaryController {
         @UploadedFile() file: Express.Multer.File,
         @Query('width') width?: number,
         @Query('height') height?: number,
+        @Query('blogId') blogId?: number,
     ) {
-        return this.cloudinaryService.uploadImageBlog(file, width, height);
+        return this.cloudinaryService.uploadImageBlog(file, width, height, blogId);
     }
 }
 

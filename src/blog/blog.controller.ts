@@ -26,6 +26,16 @@ export class BlogController {
     return this.blogService.getBlogEdit(req.user.userId, blogId);
   }
 
+  @UseGuards(JwtGuard)
+  @Patch('/edit')
+  editBlog(
+    @Request() req,
+    @Query('blogId') blogId: number,
+    @Body() updateBlogDto: UpdateBlogDto
+  ) {
+    return this.blogService.editBlog(req.user.userId, blogId, updateBlogDto);
+  }
+
   @Get()
   findAll(
     @Query('search') search: string,
