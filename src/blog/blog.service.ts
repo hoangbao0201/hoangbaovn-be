@@ -296,6 +296,72 @@ export class BlogService {
         }
     }
 
+    async getBlogEdit(userId: number, blogId: number) {
+        try {
+            const blog = await this.prismaService.blog.findUnique({
+                where: {
+                    blogId: Number(blogId),
+                    author: {
+                        userId: userId
+                    }
+                },
+                select: {
+                    blogId: true,
+                    slug: true,
+                    title: true,
+                    summary: true,
+                    content: true,
+                    thumbnailUrl: true,
+                    createdAt: true,
+                    updatedAt: true,
+                    blogTags: {
+                        select: {
+                            tags: {
+                                select: {
+                                    name: true,
+                                    slug: true,
+                                },
+                            },
+                        },
+                    },
+                    blogImages: {
+                        select: {
+                            blogImageId: true,
+                            urlImage: true
+                        }
+                    },
+                    author: {
+                        select: {
+                            role: true,
+                            userId: true,
+                            name: true,
+                            username: true,
+                            email: true,
+                            rank: true,
+                        },
+                    },
+                    _count: {
+                        select: {
+                            userViews: true,
+                            userLikes: true,
+                            userSaves: true,
+                        },
+                    },
+                },
+            });
+
+            return {
+                success: true,
+                blog: blog,
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error,
+            };
+        }
+    }
+
     update(id: number, updateBlogDto: UpdateBlogDto) {
         return `This action updates a #${id} blog`;
     }

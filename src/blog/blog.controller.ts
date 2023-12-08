@@ -17,6 +17,15 @@ export class BlogController {
     return this.blogService.create(req.user.userId, createBlogDto);
   }
 
+  @UseGuards(JwtGuard)
+  @Get('/edit')
+  getBlogEdit(
+    @Request() req,
+    @Query('blogId') blogId: number,
+  ) {
+    return this.blogService.getBlogEdit(req.user.userId, blogId);
+  }
+
   @Get()
   findAll(
     @Query('search') search: string,

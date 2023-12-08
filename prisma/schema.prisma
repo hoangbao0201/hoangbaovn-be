@@ -53,11 +53,11 @@ model Blog {
   likes        Int      @default(0)
   saves        Int      @default(0)
 
-  author     User        @relation(fields: [authorId], references: [userId])
+  author     User        @relation(fields: [authorId], references: [userId], onDelete: Cascade)
   blogTags   BlogTag[]
-  userLikes  UserLike[]
-  userSaves  UserSave[]
-  userViews  UserView[]
+  userLikes  UserLike[] 
+  userSaves  UserSave[] 
+  userViews  UserView[] 
   blogImages BlogImage[]
 }
 
@@ -65,7 +65,7 @@ model BlogImage {
   blogImageId Int    @id @default(autoincrement())
   blogId      Int
   urlImage    String @db.VarChar(200)
-  blog        Blog   @relation(fields: [blogId], references: [blogId])
+  blog        Blog   @relation(fields: [blogId], references: [blogId], onDelete: Cascade)
 }
 
 model BlogTag {
@@ -73,8 +73,8 @@ model BlogTag {
   blogId    Int
   tagId     Int
 
-  blog Blog @relation(fields: [blogId], references: [blogId])
-  tags Tag  @relation(fields: [tagId], references: [tagId])
+  blog Blog @relation(fields: [blogId], references: [blogId], onDelete: Cascade)
+  tags Tag  @relation(fields: [tagId], references: [tagId], onDelete: Cascade)
 }
 
 model Tag {
@@ -94,7 +94,7 @@ model UserView {
   createdAt   DateTime @default(now())
 
   user User? @relation(fields: [userId], references: [userId])
-  blog Blog  @relation(fields: [blogId], references: [blogId])
+  blog Blog  @relation(fields: [blogId], references: [blogId], onDelete: Cascade)
 }
 
 model UserLike {
@@ -102,8 +102,8 @@ model UserLike {
   userId     Int
   blogId     Int
 
-  user User @relation(fields: [userId], references: [userId])
-  blog Blog @relation(fields: [blogId], references: [blogId])
+  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  blog Blog @relation(fields: [blogId], references: [blogId], onDelete: Cascade)
 }
 
 model UserSave {
@@ -111,6 +111,6 @@ model UserSave {
   userId     Int
   blogId     Int
 
-  user User @relation(fields: [userId], references: [userId])
-  blog Blog @relation(fields: [blogId], references: [blogId])
+  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  blog Blog @relation(fields: [blogId], references: [blogId], onDelete: Cascade)
 }
