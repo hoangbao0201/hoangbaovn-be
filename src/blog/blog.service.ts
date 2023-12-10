@@ -296,7 +296,7 @@ export class BlogService {
         }
     }
 
-    async getBlogEdit(userId: number, blogId: number) {
+    async getEditBlog(userId: number, blogId: number) {
         try {
             const blog = await this.prismaService.blog.findUnique({
                 where: {
@@ -362,15 +362,13 @@ export class BlogService {
         }
     }
 
-    async editBlog(userId: number, blogId: number, updateBlogDto: UpdateBlogDto) {
+    async updateEditBlog(userId: number, blogId: number, updateBlogDto: UpdateBlogDto) {
         const {
             title,
-            slug,
             summary,
             published,
             content,
             thumbnailUrl,
-            blogTags,
         } = updateBlogDto;
 
         try {
@@ -383,26 +381,10 @@ export class BlogService {
                 },
                 data: {
                     title,
-                    slug,
                     summary,
                     published,
                     content,
                     thumbnailUrl,
-                    blogTags: {
-                        create: blogTags.map((tag) => ({
-                            tags: {
-                                connectOrCreate: {
-                                    where: {
-                                        slug: tag.slug,
-                                    },
-                                    create: {
-                                        name: tag.name,
-                                        slug: tag.slug,
-                                    },
-                                },
-                            },
-                        })),
-                    },
                 }
             });
 
@@ -416,10 +398,6 @@ export class BlogService {
                 error: error,
             };
         }
-    }
-
-    update(id: number, updateBlogDto: UpdateBlogDto) {
-        return `This action updates a #${id} blog`;
     }
 
     remove(id: number) {

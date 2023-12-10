@@ -23,7 +23,7 @@ export class BlogController {
     @Request() req,
     @Query('blogId') blogId: number,
   ) {
-    return this.blogService.getBlogEdit(req.user.userId, blogId);
+    return this.blogService.getEditBlog(req.user.userId, blogId);
   }
 
   @UseGuards(JwtGuard)
@@ -33,7 +33,7 @@ export class BlogController {
     @Query('blogId') blogId: number,
     @Body() updateBlogDto: UpdateBlogDto
   ) {
-    return this.blogService.editBlog(req.user.userId, blogId, updateBlogDto);
+    return this.blogService.updateEditBlog(req.user.userId, blogId, updateBlogDto);
   }
 
   @Get()
@@ -62,11 +62,6 @@ export class BlogController {
   @Get(':slug')
   findOne(@Param('slug') slug: string) {
     return this.blogService.findOne(slug);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBlogDto: UpdateBlogDto) {
-    return this.blogService.update(+id, updateBlogDto);
   }
 
   @Delete(':id')
