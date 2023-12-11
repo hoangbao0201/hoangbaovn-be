@@ -404,33 +404,19 @@ export class BlogService {
         return `This action removes a #${id} blog`;
     }
 
-    async increaseViews(id: number, ip, request: Request) {
+    async increaseViews(userId, blogId: number, ip, deviceBrand: string) {
         try {
-            if (!id) {
-                const increaseView = await this.prismaService.userView.create({
-                    data: {
-                        userId: 1,
-                        blogId: id,
-                        address: ip,
-                        deviceBrand: request.headers['user-agent'],
-                    },
-                });
-                return {
-                    success: true,
-                };
-            } else {
-                const increaseView = await this.prismaService.userView.create({
-                    data: {
-                        userId: 1,
-                        blogId: id,
-                        address: ip,
-                        deviceBrand: request.headers['user-agent'],
-                    },
-                });
-                return {
-                    success: true,
-                };
-            }
+            const increaseView = await this.prismaService.userView.create({
+                data: {
+                    userId: userId,
+                    blogId: blogId,
+                    address: ip,
+                    deviceBrand: deviceBrand,
+                },
+            });
+            return {
+                success: true,
+            };
         } catch (error) {
             return {
                 success: false,
