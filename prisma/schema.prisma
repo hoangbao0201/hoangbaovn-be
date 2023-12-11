@@ -36,6 +36,9 @@ model User {
   userLikes UserLike[]
   userSaves UserSave[]
   userViews UserView[]
+
+  commentsSent     Comment[] @relation(name: "Sender")
+  commentsReceived Comment[] @relation(name: "Receiver")
 }
 
 model Blog {
@@ -55,10 +58,11 @@ model Blog {
 
   author     User        @relation(fields: [authorId], references: [userId], onDelete: Cascade)
   blogTags   BlogTag[]
-  userLikes  UserLike[] 
-  userSaves  UserSave[] 
-  userViews  UserView[] 
+  userLikes  UserLike[]
+  userSaves  UserSave[]
+  userViews  UserView[]
   blogImages BlogImage[]
+  Comment    Comment[]
 }
 
 model BlogImage {
@@ -113,4 +117,20 @@ model UserSave {
 
   user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
   blog Blog @relation(fields: [blogId], references: [blogId], onDelete: Cascade)
+}
+
+model Comment {
+  commentId   Int      @id @default(autoincrement())
+  commentText String
+  updatedAt   DateTime @default(now()) @updatedAt
+  senderId    Int
+  blogId      Int
+  receiverId  Int?
+  parentId    Int?
+
+  blog     Blog      @relation(fields: [blogId], references: [blogId])
+  sender   User      @relation(name: "Sender", fields: [senderId], references: [userId])
+  receiver User?     @relation(name: "Receiver", fields: [receiverId], references: [userId])
+  parent   Comment?  @relation(name: "ParentComment", fields: [parentId], references: [commentId])
+  Comment  Comment[] @relation(name: "ParentComment")
 }

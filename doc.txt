@@ -2,6 +2,13 @@
 
 npx prisma migrate dev --name init
 
+prisma migrate dev
+
 npx prisma migrate up
 
 npx prisma migrate deploy
+
+
+///////
+
+prisma db push

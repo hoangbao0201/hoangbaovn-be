@@ -12,6 +12,7 @@ import { BlogModule } from './blog/blog.module';
 import { TagModule } from './tag/tag.module';
 import { AdminModule } from './admin/admin.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { CommentModule } from './comment/comment.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
     TagModule,
     AdminModule,
     CloudinaryModule,
+    CommentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
