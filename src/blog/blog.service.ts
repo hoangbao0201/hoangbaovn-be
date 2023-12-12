@@ -60,7 +60,7 @@ export class BlogService {
     }
 
     async findAll(options: {
-        search?: string;
+        q?: string;
         byu?: string;
         tag?: string;
         take?: number;
@@ -68,7 +68,7 @@ export class BlogService {
         sort?: 'desc' | 'asc';
     }) {
         const {
-            search = '',
+            q = '',
             byu = '',
             tag,
             take = 10,
@@ -90,11 +90,11 @@ export class BlogService {
                     }
                 };
             }
-            if (search != "") {
+            if (q != "") {
                 where = {
                     ...where,
                     title: {
-                        contains: search,
+                        contains: q,
                     },
                 };
             }
@@ -164,14 +164,14 @@ export class BlogService {
     }
 
     async searchBlogs(options: {
-        search?: string;
+        q?: string;
         tag?: string;
         take?: number;
         skip?: number;
         sort?: 'desc' | 'asc';
     }) {
         const {
-            search = '',
+            q = '',
             tag,
             take = 10,
             skip = 0,
@@ -184,7 +184,7 @@ export class BlogService {
                 take: +take,
                 where: {
                     title: {
-                        contains: search,
+                        contains: q,
                     },
                 },
                 select: {
@@ -220,6 +220,8 @@ export class BlogService {
             return {
                 success: true,
                 blogs: blogs || null,
+                take,
+                skip
             };
         } catch (error) {
             return {

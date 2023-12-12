@@ -50,25 +50,25 @@ export class BlogController {
 
     @Get()
     findAll(
-        @Query('search') search: string,
+        @Query('q') q: string,
         @Query('byu') byu: string,
         @Query('tag') tag: string,
         @Query('take') take: number,
         @Query('skip') skip: number,
         @Query('sort') sort: 'desc' | 'asc',
     ) {
-        return this.blogService.findAll({ search, byu, tag, take, skip, sort });
+        return this.blogService.findAll({ q, byu, tag, take: take, skip: skip, sort });
     }
 
     @Get('/search')
     searchBlogs(
-        @Query('q') search: string,
+        @Query('q') q: string,
         @Query('tag') tag: string,
         @Query('take') take: number,
         @Query('skip') skip: number,
         @Query('sort') sort: 'desc' | 'asc',
     ) {
-        return this.blogService.searchBlogs({ search, tag, take, skip, sort });
+        return this.blogService.searchBlogs({ q, tag, take: take, skip: skip, sort });
     }
 
     @Get(':slug')
