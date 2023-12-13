@@ -14,6 +14,7 @@ import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { JwtGuard } from '../auth/guard/jwt.guard';
+import { CreateReplyCommentDto } from './dto/create-replycomment.dto';
 
 @Controller('/api/comments')
 export class CommentController {
@@ -28,32 +29,32 @@ export class CommentController {
         );
     }
 
-    @Post(':id')
+    @UseGuards(JwtGuard)
+    @Post("/reply")
+    createReplyComment(@Request() req, @Body() createReplyCommentDto: CreateReplyCommentDto) {
+        return this.commentService.createReplyComment(
+            req.user.userId,
+            createReplyCommentDto,
+        );
+    }
+
+    @Get('/')
     getComments(
-        @Param('id') blogId: string,
+        @Query('blogId') blogId: number,
         @Query('take') take: number,
         @Query('skip') skip: number,
     ) {
-        return this.commentService.getComments({ blogId: +blogId, take, skip });
+        return this.commentService.getComments({ blogId, take, skip });
     }
 
-    // @Get()
-    // findAll() {
-    //   return this.commentService.findAll();
-    // }
+    @Get('/reply')
+    getReplyComments(
+        @Query('blogId') blogId: number,
+        @Query('parentId') parentId: number,
+        @Query('take') take: number,
+        @Query('skip') skip: number,
+    ) {
+        return this.commentService.getReplyComments({ blogId, parentId, take, skip });
+    }
 
-    // @Get(':id')
-    // findOne(@Param('id') id: string) {
-    //   return this.commentService.findOne(+id);
-    // }
-
-    // @Patch(':id')
-    // update(@Param('id') id: string, @Body() updateCommentDto: UpdateCommentDto) {
-    //   return this.commentService.update(+id, updateCommentDto);
-    // }
-
-    // @Delete(':id')
-    // remove(@Param('id') id: string) {
-    //   return this.commentService.remove(+id);
-    // }
 }

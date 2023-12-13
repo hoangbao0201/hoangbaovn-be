@@ -122,6 +122,7 @@ model UserSave {
 model Comment {
   commentId   Int      @id @default(autoincrement())
   commentText String
+  createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now()) @updatedAt
   senderId    Int
   blogId      Int
@@ -132,5 +133,6 @@ model Comment {
   sender   User      @relation(name: "Sender", fields: [senderId], references: [userId])
   receiver User?     @relation(name: "Receiver", fields: [receiverId], references: [userId])
   parent   Comment?  @relation(name: "ParentComment", fields: [parentId], references: [commentId])
-  Comment  Comment[] @relation(name: "ParentComment")
+
+  replyComments  Comment[] @relation(name: "ParentComment")
 }
