@@ -45,7 +45,7 @@ model Blog {
   blogId       Int      @id @default(autoincrement())
   authorId     Int
   title        String   @db.VarChar(100)
-  slug         String   @unique @db.VarChar(100)
+  slug         String   @db.VarChar(100)
   summary      String   @db.Text
   published    Boolean  @default(true)
   createdAt    DateTime @default(now())
@@ -63,6 +63,8 @@ model Blog {
   userViews  UserView[]
   blogImages BlogImage[]
   Comment    Comment[]
+
+  @@index([blogId])
 }
 
 model BlogImage {
@@ -129,10 +131,10 @@ model Comment {
   receiverId  Int?
   parentId    Int?
 
-  blog     Blog      @relation(fields: [blogId], references: [blogId])
-  sender   User      @relation(name: "Sender", fields: [senderId], references: [userId])
-  receiver User?     @relation(name: "Receiver", fields: [receiverId], references: [userId])
-  parent   Comment?  @relation(name: "ParentComment", fields: [parentId], references: [commentId])
+  blog     Blog     @relation(fields: [blogId], references: [blogId])
+  sender   User     @relation(name: "Sender", fields: [senderId], references: [userId])
+  receiver User?    @relation(name: "Receiver", fields: [receiverId], references: [userId])
+  parent   Comment? @relation(name: "ParentComment", fields: [parentId], references: [commentId])
 
-  replyComments  Comment[] @relation(name: "ParentComment")
+  replyComments Comment[] @relation(name: "ParentComment")
 }

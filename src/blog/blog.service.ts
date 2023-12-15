@@ -233,13 +233,12 @@ export class BlogService {
 
     async findOne(slug?: string) {
         try {
-            const cvSlug = slug.substring(0, slug.lastIndexOf('-'));
+            // const cvSlug = slug.substring(0, slug.lastIndexOf('-'));
             const cvBlogId = slug.substring(slug.lastIndexOf('-') + 1);
 
             const blog = await this.prismaService.blog.findUnique({
                 where: {
-                    blogId: Number(cvBlogId),
-                    slug: cvSlug,
+                    blogId: +cvBlogId,
                 },
                 select: {
                     blogId: true,
@@ -302,7 +301,7 @@ export class BlogService {
         try {
             const blog = await this.prismaService.blog.findUnique({
                 where: {
-                    blogId: Number(blogId),
+                    blogId: +blogId,
                     author: {
                         userId: userId
                     }
@@ -376,7 +375,7 @@ export class BlogService {
         try {
             const blog = await this.prismaService.blog.update({
                 where: {
-                    blogId: Number(blogId),
+                    blogId: +blogId,
                     author: {
                         userId: userId
                     }
