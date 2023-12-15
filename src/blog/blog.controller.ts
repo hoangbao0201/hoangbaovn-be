@@ -60,6 +60,11 @@ export class BlogController {
         return this.blogService.findAll({ q, byu, tag, take: take, skip: skip, sort });
     }
 
+    @Get("/seo")
+    findAllSEO() {
+        return this.blogService.findAllSEO();
+    }
+
     @Get('/search')
     searchBlogs(
         @Query('q') q: string,

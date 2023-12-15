@@ -153,7 +153,30 @@ export class BlogService {
             });
             return {
                 success: true,
-                blogs: blogs || null,
+                blogs: blogs || [],
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error,
+            };
+        }
+    }
+
+    async findAllSEO() {
+        try {
+            const blogs = await this.prismaService.blog.findMany({
+                select: {
+                    blogId: true,
+                    slug: true,
+                    title: true,
+                    createdAt: true,
+                    updatedAt: true,
+                },
+            });
+            return {
+                success: true,
+                blogs: blogs || [],
             };
         } catch (error) {
             return {
