@@ -56,6 +56,9 @@ export class UserService {
             where: {
                 email: email,
             },
+            include: {
+                role: true
+            }
         });
     }
 }

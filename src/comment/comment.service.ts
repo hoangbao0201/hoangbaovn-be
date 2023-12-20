@@ -67,6 +67,9 @@ export class CommentService {
             const comments = await this.prismaService.comment.findMany({
                 skip: +skip,
                 take: +take,
+                orderBy: {
+                    createdAt: "desc"
+                },
                 where: {
                     blogId: +blogId,
                     parentId: null,
@@ -119,6 +122,9 @@ export class CommentService {
             const comments = await this.prismaService.comment.findMany({
                 skip: +skip,
                 take: +take,
+                orderBy: {
+                    createdAt: "asc"
+                },
                 where: {
                     blogId: +blogId,
                     parentId: +parentId,
@@ -152,6 +158,31 @@ export class CommentService {
             return {
                 success: true,
                 comments: comments,
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error,
+            };
+        }
+    }
+
+    async deleteComment({ userId, commentId }: {
+        userId: number,
+        commentId: number,
+    }) {
+
+        try {
+            const comment = await this.prismaService.comment.delete({
+                where: {
+                    sender: {
+                        userId: +userId
+                    },
+                    commentId: +commentId
+                },
+            });
+            return {
+                success: true,
             };
         } catch (error) {
             return {
