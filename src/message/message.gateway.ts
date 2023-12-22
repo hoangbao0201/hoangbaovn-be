@@ -16,7 +16,7 @@ import { Logger } from '@nestjs/common';
 export class MessageGateway {
     @WebSocketServer() server: Server;
 
-    private activeSockets: { room: string; id: string }[] = [{ room: "123", id: "hello" }];
+    private activeSockets: { room: string; id: string }[] = [];
 
     private logger: Logger = new Logger('MessageGateway');
 

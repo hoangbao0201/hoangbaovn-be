@@ -2,18 +2,15 @@ import { IoAdapter } from '@nestjs/platform-socket.io';
 import { ServerOptions } from 'socket.io';
 import { createAdapter } from '@socket.io/redis-adapter';
 import { createClient } from 'redis';
-import { ConfigService } from '@nestjs/config';
 
 export class RedisIoAdapter extends IoAdapter {
-    constructor(private readonly configService: ConfigService) {
-        super();
-    }
     private adapterConstructor: ReturnType<typeof createAdapter>;
 
     async connectToRedis(): Promise<void> {
         try {
-            // const pubClient = createClient({ url: `redis://:I4PYpDkmr6Eh8TeRM0a9Oe3cQUZroioc@redis-19513.c274.us-east-1-3.ec2.cloud.redislabs.com:19513` });
-            const pubClient = createClient({ url: this.configService.get("URL_REDIS") });
+            const pubClient = createClient({ url: `redis://:I4PYpDkmr6Eh8TeRM0a9Oe3cQUZroioc@redis-19513.c274.us-east-1-3.ec2.cloud.redislabs.com:19513` });
+            // const pubClient = createClient({ url: this.configService.get("URL_REDIS") });
+
             const subClient = pubClient.duplicate();
 
             await Promise.all([pubClient.connect(), subClient.connect()]);
