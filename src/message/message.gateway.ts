@@ -22,14 +22,17 @@ export class MessageGateway {
 
     @SubscribeMessage('joinRoom')
     public joinRoom(client: Socket, room: string): void {
-        /*
+/*
     client.join(room);
-    client.emit('joinedRoom', room);
-    */
+        client.emit('joinedRoom', room);
+        */
 
         const existingSocket = this.activeSockets?.find(
             (socket) => socket.room === room && socket.id === client.id,
         );
+        
+        console.log("activeSockets: ", JSON.stringify(this.activeSockets));
+        console.log("existingSocket 1: ", JSON.stringify(existingSocket));
 
         if (!existingSocket) {
             this.activeSockets = [
@@ -49,6 +52,9 @@ export class MessageGateway {
             client.broadcast.emit(`${room}-add-user`, {
                 user: client.id,
             });
+
+            console.log("room 2: ", room);
+            console.log("activeSockets 2: ", JSON.stringify(this.activeSockets));
         }
 
         return this.logger.log(`Client ${client.id} joined ${room}`);
@@ -98,4 +104,5 @@ export class MessageGateway {
 
         this.logger.log(`Client disconnected: ${client.id}`);
     }
+
 }

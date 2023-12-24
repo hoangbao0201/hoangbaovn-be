@@ -5,6 +5,7 @@ import {
     UploadedFile,
     Query,
     UseGuards,
+    Request,
 } from '@nestjs/common';
 import { CloudinaryService } from './cloudinary.service';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -18,12 +19,13 @@ export class CloudinaryController {
     @Post('/upload/blog')
     @UseInterceptors(FileInterceptor('image'))
     uploadImage(
+        @Request() req,
         @UploadedFile() file: Express.Multer.File,
         @Query('width') width?: number,
         @Query('height') height?: number,
         @Query('blogId') blogId?: number,
     ) {
-        return this.cloudinaryService.uploadImageBlog(file, width, height, blogId);
+        return this.cloudinaryService.uploadImageBlog({ userId:req.user.userId, file, width, height, blogId });
     }
 }
 
