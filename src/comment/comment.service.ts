@@ -1,47 +1,44 @@
 import { Injectable } from '@nestjs/common';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateReplyCommentDto } from './dto/create-replycomment.dto';
 
 @Injectable()
 export class CommentService {
     constructor(private prismaService: PrismaService) {}
 
     async createComment(userId: number, createCommentDto: CreateCommentDto) {
-        const { blogId, commentText } = createCommentDto;
-        try {
-            const comment = await this.prismaService.comment.create({
-                data: {
-                    senderId: +userId,
-                    blogId: +blogId,
-                    commentText: commentText,
-                },
-            });
-            return {
-                success: true,
-                comment: comment,
-            };
-        } catch (error) {
-            return {
-                success: false,
-                error: error,
-            };
-        }
-    }
-
-    async createReplyComment(
-        userId: number,
-        createCommentDto: CreateReplyCommentDto,
-    ) {
         const { blogId, parentId, receiverId, commentText } = createCommentDto;
         try {
             const comment = await this.prismaService.comment.create({
                 data: {
                     senderId: +userId,
                     blogId: +blogId,
-                    parentId: +parentId,
-                    receiverId: +receiverId,
+                    parentId: parentId ? +parentId : null,
+                    receiverId: receiverId ? +receiverId : null,
                     commentText: commentText,
+                },
+                select: {
+                    blogId: true,
+                    commentId: true,
+                    commentText: true,
+                    parentId: true,
+                    createdAt: true,
+                    updatedAt: true,
+                    _count: {
+                        select: {
+                            replyComments: true,
+                        },
+                    },
+                    sender: {
+                        select: {
+                            userId: true,
+                            name: true,
+                            username: true,
+                            rank: true,
+                            role: true,
+                            avatarUrl: true,
+                        },
+                    },
                 },
             });
             return {
@@ -78,6 +75,7 @@ export class CommentService {
                     blogId: true,
                     commentId: true,
                     commentText: true,
+                    parentId: true,
                     createdAt: true,
                     updatedAt: true,
                     _count: {
@@ -133,6 +131,7 @@ export class CommentService {
                     blogId: true,
                     commentId: true,
                     commentText: true,
+                    parentId: true,
                     createdAt: true,
                     updatedAt: true,
                     sender: {

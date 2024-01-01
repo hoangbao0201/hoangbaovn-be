@@ -20,10 +20,9 @@ async function bootstrap() {
     app.use(json({ limit: '50mb' }));
     app.use(urlencoded({ extended: true, limit: '50mb' }));
 
-    const redisIoAdapter = new RedisIoAdapter(app);
-    await redisIoAdapter.connectToRedis();
-
-    app.useWebSocketAdapter(redisIoAdapter);
+    // const redisIoAdapter = new RedisIoAdapter(app);
+    // await redisIoAdapter.connectToRedis();
+    // app.useWebSocketAdapter(redisIoAdapter);
 
 
     await app.listen(process.env.PORT || 4000);

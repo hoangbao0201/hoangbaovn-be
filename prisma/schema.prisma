@@ -123,7 +123,7 @@ model UserSave {
 
 model Comment {
   commentId   Int      @id @default(autoincrement())
-  commentText String
+  commentText String   @db.Text
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now()) @updatedAt
   senderId    Int
@@ -134,7 +134,7 @@ model Comment {
   blog     Blog     @relation(fields: [blogId], references: [blogId])
   sender   User     @relation(name: "Sender", fields: [senderId], references: [userId])
   receiver User?    @relation(name: "Receiver", fields: [receiverId], references: [userId])
-  parent   Comment? @relation(name: "ParentComment", fields: [parentId], references: [commentId])
+  parent   Comment? @relation(name: "ParentComment", fields: [parentId], references: [commentId], onDelete: Cascade)
 
   replyComments Comment[] @relation(name: "ParentComment")
 }

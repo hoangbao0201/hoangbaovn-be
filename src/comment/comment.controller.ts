@@ -12,9 +12,7 @@ import {
 } from '@nestjs/common';
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
-import { UpdateCommentDto } from './dto/update-comment.dto';
 import { JwtGuard } from '../auth/guard/jwt.guard';
-import { CreateReplyCommentDto } from './dto/create-replycomment.dto';
 import { JwtConfirmGuard } from '../auth/guard/jwt.confirm.guard';
 
 @Controller('/api/comments')
@@ -32,14 +30,14 @@ export class CommentController {
     }
 
     // @UseGuards(JwtGuard)
-    @UseGuards(JwtConfirmGuard)
-    @Post("/reply")
-    createReplyComment(@Request() req, @Body() createReplyCommentDto: CreateReplyCommentDto) {
-        return this.commentService.createReplyComment(
-            req.user.userId,
-            createReplyCommentDto,
-        );
-    }
+    // @UseGuards(JwtConfirmGuard)
+    // @Post("/reply")
+    // createReplyComment(@Request() req, @Body() createReplyCommentDto: CreateReplyCommentDto) {
+    //     return this.commentService.createReplyComment(
+    //         req.user.userId,
+    //         createReplyCommentDto,
+    //     );
+    // }
 
     @Get('/')
     getComments(
