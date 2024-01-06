@@ -81,9 +81,10 @@ export class BlogController {
         return this.blogService.findOne(slug);
     }
 
-    @Delete(':id')
-    remove(@Param('id') id: string) {
-        return this.blogService.remove(+id);
+    @UseGuards(JwtGuard)
+    @Delete(':blogId')
+    remove(@Param('blogId') blogId: number, @Request() req,) {
+        return this.blogService.remove(+blogId, +req.user.userId);
     }
 
     @UseGuards(JwtConfirmGuard)

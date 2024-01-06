@@ -1,32 +1,32 @@
 import { Tag } from "@prisma/client"
-import { IsBoolean, IsNotEmpty, IsString } from "class-validator"
+import { IsBoolean, IsNotEmpty, IsOptional, IsString } from "class-validator"
 
 export class CreateBlogDto {
     @IsString()
-    @IsNotEmpty()
-    title: string
+    @IsOptional()
+    title?: string
 
     @IsString()
-    @IsNotEmpty()
-    summary: string
+    @IsOptional()
+    summary?: string
     
     @IsString()
-    @IsNotEmpty()
     slug: string
     
     // @IsBoolean()
-    @IsNotEmpty()
-    published: boolean
+    @IsOptional()
+    published?: boolean
 
     @IsString()
-    @IsNotEmpty()
-    content: string
+    @IsOptional()
+    content?: string
 
     @IsString()
+    @IsOptional()
     thumbnailUrl?: string
 
-    @IsNotEmpty()
-    blogTags: {
+    @IsOptional()
+    blogTags?: {
         name: string
         slug: string
     }[]

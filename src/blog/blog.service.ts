@@ -11,13 +11,13 @@ export class BlogService {
 
     async create(userId: number, createBlogDto: CreateBlogDto) {
         const {
-            title,
-            slug,
-            summary,
-            published,
-            content,
-            thumbnailUrl,
-            blogTags,
+            title = '',
+            slug = '',
+            summary = '',
+            published = false,
+            content = '',
+            thumbnailUrl = '',
+            blogTags = [],
         } = createBlogDto;
         try {
             const blog = await this.prismaService.blog.create({
@@ -27,7 +27,7 @@ export class BlogService {
                     slug: slug,
                     summary: summary,
                     content: content,
-                    published: true,
+                    published: published,
                     thumbnailUrl: thumbnailUrl,
                     blogTags: {
                         create: blogTags.map((tag) => ({
@@ -70,7 +70,7 @@ export class BlogService {
         const {
             q = '',
             byu = '',
-            tag,
+            tag = '',
             take = 10,
             skip = 0,
             sort = 'desc',
@@ -78,19 +78,19 @@ export class BlogService {
 
         try {
             let where: Prisma.BlogWhereInput = {};
-            if (tag != "") {
+            if (tag != '') {
                 where = {
                     ...where,
                     blogTags: {
                         some: {
                             tags: {
-                                slug: tag
-                            }
-                        }
-                    }
+                                slug: tag,
+                            },
+                        },
+                    },
                 };
             }
-            if (q != "") {
+            if (q != '') {
                 where = {
                     ...where,
                     title: {
@@ -98,12 +98,12 @@ export class BlogService {
                     },
                 };
             }
-            if (byu != "") {
+            if (byu != '') {
                 where = {
                     ...where,
                     author: {
-                        username: byu
-                    }
+                        username: byu,
+                    },
                 };
             }
 
@@ -193,13 +193,7 @@ export class BlogService {
         skip?: number;
         sort?: 'desc' | 'asc';
     }) {
-        const {
-            q = '',
-            tag,
-            take = 10,
-            skip = 0,
-            sort = 'desc',
-        } = options;
+        const { q = '', tag, take = 10, skip = 0, sort = 'desc' } = options;
 
         try {
             const blogs = await this.prismaService.blog.findMany({
@@ -244,7 +238,7 @@ export class BlogService {
                 success: true,
                 blogs: blogs || null,
                 take,
-                skip
+                skip,
             };
         } catch (error) {
             return {
@@ -285,8 +279,8 @@ export class BlogService {
                     blogImages: {
                         select: {
                             blogImageId: true,
-                            urlImage: true
-                        }
+                            urlImage: true,
+                        },
                     },
                     author: {
                         select: {
@@ -326,8 +320,8 @@ export class BlogService {
                 where: {
                     blogId: +blogId,
                     author: {
-                        userId: userId
-                    }
+                        userId: userId,
+                    },
                 },
                 select: {
                     blogId: true,
@@ -351,8 +345,8 @@ export class BlogService {
                     blogImages: {
                         select: {
                             blogImageId: true,
-                            urlImage: true
-                        }
+                            urlImage: true,
+                        },
                     },
                     author: {
                         select: {
@@ -386,22 +380,21 @@ export class BlogService {
         }
     }
 
-    async updateEditBlog(userId: number, blogId: number, updateBlogDto: UpdateBlogDto) {
-        const {
-            title,
-            summary,
-            published,
-            content,
-            thumbnailUrl,
-        } = updateBlogDto;
+    async updateEditBlog(
+        userId: number,
+        blogId: number,
+        updateBlogDto: UpdateBlogDto,
+    ) {
+        const { title = "", summary = "", published = false, content = "", thumbnailUrl = "" } =
+            updateBlogDto;
 
         try {
             const blog = await this.prismaService.blog.update({
                 where: {
                     blogId: +blogId,
                     author: {
-                        userId: userId
-                    }
+                        userId: userId,
+                    },
                 },
                 data: {
                     title,
@@ -409,7 +402,7 @@ export class BlogService {
                     published,
                     content,
                     thumbnailUrl,
-                }
+                },
             });
 
             return {
@@ -424,8 +417,27 @@ export class BlogService {
         }
     }
 
-    remove(id: number) {
-        return `This action removes a #${id} blog`;
+    async remove(blogId: number, userId: number) {
+        try {
+            const blog = await this.prismaService.blog.delete({
+                where: {
+                    blogId: +blogId,
+                    author: {
+                        userId: +userId,
+                    },
+                },
+            });
+
+            return {
+                success: true,
+                blog: blog,
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error,
+            };
+        }
     }
 
     async increaseViews(userId, blogId: number, ip, deviceBrand: string) {

@@ -24,8 +24,9 @@ export class CloudinaryController {
         @Query('width') width?: number,
         @Query('height') height?: number,
         @Query('blogId') blogId?: number,
+        @Query('type') type?: string,
     ) {
-        return this.cloudinaryService.uploadImageBlog({ userId:req.user.userId, file, width, height, blogId });
+        return this.cloudinaryService.uploadImageBlog({ userId:req.user.userId, file, type, width, height, blogId });
     }
 }
 
