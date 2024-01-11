@@ -67,13 +67,6 @@ model Blog {
   @@index([blogId])
 }
 
-model BlogImage {
-  blogImageId Int    @id @default(autoincrement())
-  blogId      Int
-  urlImage    String @db.VarChar(200)
-  blog        Blog   @relation(fields: [blogId], references: [blogId], onDelete: Cascade)
-}
-
 model BlogTag {
   blogTagId Int @id @default(autoincrement())
   blogId    Int
@@ -89,6 +82,13 @@ model Tag {
   slug  String @unique @db.VarChar(100)
 
   blogTags BlogTag[]
+}
+
+model BlogImage {
+  blogImageId Int    @id @default(autoincrement())
+  blogId      Int
+  urlImage    String @db.VarChar(200)
+  blog        Blog   @relation(fields: [blogId], references: [blogId], onDelete: Cascade)
 }
 
 model UserView {

@@ -14,8 +14,8 @@ export class BlogService {
             title = '',
             slug = '',
             summary = '',
-            published = false,
             content = '',
+            published = false,
             thumbnailUrl = '',
             blogTags = [],
         } = createBlogDto;
@@ -25,25 +25,25 @@ export class BlogService {
                     authorId: userId,
                     title: title,
                     slug: slug,
-                    summary: summary,
                     content: content,
-                    published: published,
-                    thumbnailUrl: thumbnailUrl,
-                    blogTags: {
-                        create: blogTags.map((tag) => ({
-                            tags: {
-                                connectOrCreate: {
-                                    where: {
-                                        slug: tag.slug,
-                                    },
-                                    create: {
-                                        name: tag.name,
-                                        slug: tag.slug,
-                                    },
-                                },
-                            },
-                        })),
-                    },
+                    summary: summary,
+                    // published: published,
+                    // thumbnailUrl: thumbnailUrl,
+                    // blogTags: {
+                    //     create: blogTags.map((tag) => ({
+                    //         tags: {
+                    //             connectOrCreate: {
+                    //                 where: {
+                    //                     slug: tag.slug,
+                    //                 },
+                    //                 create: {
+                    //                     name: tag.name,
+                    //                     slug: tag.slug,
+                    //                 },
+                    //             },
+                    //         },
+                    //     })),
+                    // },
                 },
             });
             return {
@@ -332,8 +332,10 @@ export class BlogService {
                     thumbnailUrl: true,
                     createdAt: true,
                     updatedAt: true,
+                    published: true,
                     blogTags: {
                         select: {
+                            blogTagId: true,
                             tags: {
                                 select: {
                                     name: true,
@@ -385,10 +387,22 @@ export class BlogService {
         blogId: number,
         updateBlogDto: UpdateBlogDto,
     ) {
-        const { title = "", summary = "", published = false, content = "", thumbnailUrl = "" } =
+        const { title = "", summary = "", published = false, blogTags = [], content = "", thumbnailUrl = "" } =
             updateBlogDto;
-
+        
         try {
+            // Delete BlogTag
+            // await this.prismaService.blogTag.deleteMany({
+            //     where: {
+            //         blog: {
+            //             blogId: blogId,
+            //             author: {
+            //                 userId: userId
+            //             }
+            //         }
+            //     }
+            // })
+
             const blog = await this.prismaService.blog.update({
                 where: {
                     blogId: +blogId,
@@ -402,12 +416,29 @@ export class BlogService {
                     published,
                     content,
                     thumbnailUrl,
+                    blogTags: {
+                        deleteMany: {},
+                        create: blogTags.map((tag) => ({
+                            tags: {
+                                connectOrCreate: {
+                                    where: {
+                                        slug: tag.tags.slug,
+                                    },
+                                    create: {
+                                        name: tag.tags.name,
+                                        slug: tag.tags.slug,
+                                    },
+                                },
+                            },
+                        })),
+                    },
                 },
             });
 
             return {
                 success: true,
                 blog: blog,
+                blogTags: blogTags
             };
         } catch (error) {
             return {
