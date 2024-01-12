@@ -38,8 +38,9 @@ export class TagController {
   @Delete(':blogTagId')
   remove(
     @Request() req,
-    @Query('blogId') blogTagId: number
+    @Query('blogId') blogId: number,
+    @Query('tagId') tagId: number
   ) {
-    return this.tagService.remove(+req.user.userId, +blogTagId);
+    return this.tagService.remove(+req.user.userId, +blogId, tagId);
   }
 }

@@ -89,7 +89,7 @@ export class BlogController {
 
     @UseGuards(JwtConfirmGuard)
     @Patch('/view/:id?')
-    increaseViews(@Request() req, @Param('id') blogId: string, @Ip() ip) {
-        return this.blogService.increaseViews(req.user.userId, +blogId, ip, req.headers['user-agent']);
+    increaseViews(@Request() req, @Param('id') blogId: string) {
+        return this.blogService.increaseViews(req.user.userId, +blogId);
     }
 }

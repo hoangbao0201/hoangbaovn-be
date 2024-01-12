@@ -68,12 +68,13 @@ model Blog {
 }
 
 model BlogTag {
-  blogTagId Int @id @default(autoincrement())
   blogId    Int
   tagId     Int
 
   blog Blog @relation(fields: [blogId], references: [blogId], onDelete: Cascade)
   tags Tag  @relation(fields: [tagId], references: [tagId], onDelete: Cascade)
+
+  @@id([blogId, tagId])
 }
 
 model Tag {
@@ -95,8 +96,6 @@ model UserView {
   userViewId  Int      @id @default(autoincrement())
   userId      Int?
   blogId      Int
-  address     String?
-  deviceBrand String?
   createdAt   DateTime @default(now())
 
   user User? @relation(fields: [userId], references: [userId])

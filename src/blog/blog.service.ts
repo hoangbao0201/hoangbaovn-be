@@ -335,9 +335,9 @@ export class BlogService {
                     published: true,
                     blogTags: {
                         select: {
-                            blogTagId: true,
                             tags: {
                                 select: {
+                                    tagId: true,
                                     name: true,
                                     slug: true,
                                 },
@@ -387,22 +387,17 @@ export class BlogService {
         blogId: number,
         updateBlogDto: UpdateBlogDto,
     ) {
-        const { title = "", summary = "", published = false, blogTags = [], content = "", thumbnailUrl = "" } =
-            updateBlogDto;
-        
-        try {
-            // Delete BlogTag
-            // await this.prismaService.blogTag.deleteMany({
-            //     where: {
-            //         blog: {
-            //             blogId: blogId,
-            //             author: {
-            //                 userId: userId
-            //             }
-            //         }
-            //     }
-            // })
+        const {
+            slug = '',
+            title = '',
+            summary = '',
+            published = false,
+            blogTags = [],
+            content = '',
+            thumbnailUrl = '',
+        } = updateBlogDto;
 
+        try {
             const blog = await this.prismaService.blog.update({
                 where: {
                     blogId: +blogId,
@@ -412,6 +407,7 @@ export class BlogService {
                 },
                 data: {
                     title,
+                    slug,
                     summary,
                     published,
                     content,
@@ -438,7 +434,7 @@ export class BlogService {
             return {
                 success: true,
                 blog: blog,
-                blogTags: blogTags
+                blogTags: blogTags,
             };
         } catch (error) {
             return {
@@ -471,14 +467,12 @@ export class BlogService {
         }
     }
 
-    async increaseViews(userId, blogId: number, ip, deviceBrand: string) {
+    async increaseViews(userId, blogId: number) {
         try {
             const increaseView = await this.prismaService.userView.create({
                 data: {
                     userId: userId,
                     blogId: blogId,
-                    address: ip,
-                    deviceBrand: deviceBrand,
                 },
             });
             return {

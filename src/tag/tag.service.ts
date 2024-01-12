@@ -71,15 +71,18 @@ export class TagService {
         return `This action updates a #${id} tag`;
     }
 
-    async remove(userId: number, blogTagId: number) {
+    async remove(userId: number, blogId: number, tagId: number) {
         try {
             const tag = await this.prismaService.blogTag.delete({
                 where: {
-                    blogTagId: blogTagId,
+                    blogId_tagId: {
+                        blogId: blogId,
+                        tagId: tagId
+                    },
                     blog: {
-                      author: {
-                        userId: userId
-                      }
+                        author: {
+                            userId: userId
+                        }
                     }
                 },
             });

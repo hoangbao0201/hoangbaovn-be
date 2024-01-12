@@ -26,5 +26,5 @@ export class CreateBlogDto {
     thumbnailUrl?: string
 
     @IsOptional()
-    blogTags: { tags: { name: string, slug: string } }[]
+    blogTags: { tags: { tagId: number, name: string, slug: string } }[]
 }
