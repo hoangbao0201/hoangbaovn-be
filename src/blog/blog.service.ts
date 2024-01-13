@@ -62,32 +62,45 @@ export class BlogService {
     async findAll(options: {
         q?: string;
         byu?: string;
-        tag?: string;
+        tags?: string;
         take?: number;
         skip?: number;
         sort?: 'desc' | 'asc';
+        otherId?: number
     }) {
         const {
             q = '',
             byu = '',
-            tag = '',
+            tags = '',
             take = 10,
             skip = 0,
             sort = 'desc',
+            otherId
         } = options;
+        const listTag = tags ? tags.split(",") : [];
 
         try {
             let where: Prisma.BlogWhereInput = {};
-            if (tag != '') {
+            if(otherId) {
+                where = {
+                    ...where,
+                    NOT: {
+                        blogId: +otherId
+                    }
+                }
+            }
+            if (listTag.length > 0) {
                 where = {
                     ...where,
                     blogTags: {
                         some: {
                             tags: {
-                                slug: tag,
-                            },
-                        },
-                    },
+                                OR: listTag.map((tag) => ({
+                                    slug: tag
+                                })),
+                            }
+                        }
+                    }
                 };
             }
             if (q != '') {
@@ -152,7 +165,7 @@ export class BlogService {
                 },
             });
             return {
-                success: true,
+                success: true, 
                 blogs: blogs || [],
             };
         } catch (error) {
@@ -188,14 +201,31 @@ export class BlogService {
 
     async searchBlogs(options: {
         q?: string;
-        tag?: string;
+        tags?: string;
         take?: number;
         skip?: number;
         sort?: 'desc' | 'asc';
     }) {
-        const { q = '', tag, take = 10, skip = 0, sort = 'desc' } = options;
+        const { q = '', tags = '', take = 10, skip = 0, sort = 'desc' } = options;
+        const listTag = tags ? tags.split(",") : [];
 
         try {
+            let where: Prisma.BlogWhereInput = {};
+            if (tags.length > 0) {
+                where = {
+                    ...where,
+                    blogTags: {
+                        some: {
+                            tags: {
+                                OR: listTag.map((tag) => ({
+                                    slug: tag
+                                }))
+                            }
+                        }
+                    }
+                };
+            }
+
             const blogs = await this.prismaService.blog.findMany({
                 skip: +skip,
                 take: +take,
@@ -237,8 +267,6 @@ export class BlogService {
             return {
                 success: true,
                 blogs: blogs || null,
-                take,
-                skip,
             };
         } catch (error) {
             return {
@@ -467,12 +495,12 @@ export class BlogService {
         }
     }
 
-    async increaseViews(userId, blogId: number) {
+    async increaseViews(userId: number, blogId: number) {
         try {
             const increaseView = await this.prismaService.userView.create({
                 data: {
-                    userId: userId,
-                    blogId: blogId,
+                    userId: +userId,
+                    blogId: +blogId,
                 },
             });
             return {

@@ -52,12 +52,13 @@ export class BlogController {
     findAll(
         @Query('q') q: string,
         @Query('byu') byu: string,
-        @Query('tag') tag: string,
+        @Query('tags') tags: string,
         @Query('take') take: number,
         @Query('skip') skip: number,
+        @Query('otherId') otherId: number,
         @Query('sort') sort: 'desc' | 'asc',
     ) {
-        return this.blogService.findAll({ q, byu, tag, take: take, skip: skip, sort });
+        return this.blogService.findAll({ q, byu, tags, take: take, skip: skip, sort, otherId });
     }
 
     @Get("/seo")
@@ -68,12 +69,12 @@ export class BlogController {
     @Get('/search')
     searchBlogs(
         @Query('q') q: string,
-        @Query('tag') tag: string,
+        @Query('tags') tags: string,
         @Query('take') take: number,
         @Query('skip') skip: number,
         @Query('sort') sort: 'desc' | 'asc',
     ) {
-        return this.blogService.searchBlogs({ q, tag, take: take, skip: skip, sort });
+        return this.blogService.searchBlogs({ q, tags, take: take, skip: skip, sort });
     }
 
     @Get(':slug')
@@ -89,7 +90,7 @@ export class BlogController {
 
     @UseGuards(JwtConfirmGuard)
     @Patch('/view/:id?')
-    increaseViews(@Request() req, @Param('id') blogId: string) {
-        return this.blogService.increaseViews(req.user.userId, +blogId);
+    increaseViews(@Request() req, @Param('id') blogId: number) {
+        return this.blogService.increaseViews(req.user.userId, blogId);
     }
 }
