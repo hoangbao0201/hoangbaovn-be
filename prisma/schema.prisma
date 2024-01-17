@@ -103,12 +103,13 @@ model UserView {
 }
 
 model UserLike {
-  userLikeId Int @id @default(autoincrement())
   userId     Int
   blogId     Int
 
   user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
   blog Blog @relation(fields: [blogId], references: [blogId], onDelete: Cascade)
+
+  @@id([userId, blogId])
 }
 
 model UserSave {

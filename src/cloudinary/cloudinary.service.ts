@@ -4,8 +4,7 @@ import {
     UploadApiResponse,
     v2 as cloudinary,
 } from 'cloudinary';
-import { PrismaService } from 'src/prisma/prisma.service';
-// import { CloudinaryResponse } from './cloudinary-response';
+import { PrismaService } from '../prisma/prisma.service';
 import { Readable } from 'stream';
 
 type CloudinaryResponse = {
@@ -38,11 +37,11 @@ export class CloudinaryService {
                 throw new Error('Blog id not found');
             }
 
-            const author = await this.prismaService.blog.findUnique({
+            const checkBlog = await this.prismaService.blog.findUnique({
                 where: { blogId: +blogId, author: { userId: +userId } },
-                select: { blogId: true },
+                select: { blogId: true, thumbnailUrl: true },
             });
-            if (!author) {
+            if (!checkBlog) {
                 throw new Error('You do not have permission');
             }
 
@@ -77,28 +76,24 @@ export class CloudinaryService {
             );
 
             if(type === "thumbnail") {
-                const blogImageThumbnail = await this.prismaService.blog.update({
-                    where: {
-                        blogId: blogId,
-                        author: {
-                            userId: userId
-                        }
-                    },
-                    data: {
-                        thumbnailUrl: result.url
-                    }
-                });
-                
+                let dataDeleteImage = null;
+                if(checkBlog.thumbnailUrl.length > 0) {
+                    const splitUrl = checkBlog.thumbnailUrl.split("/");
+                    dataDeleteImage = await this.deleteImageBlog({ imageId: "HOANGBAOVN/blog/thumbnail/" + splitUrl[splitUrl.length - 1].split(".")[0] })
+                }
                 return {
                     success: true,
-                    blogImageThumbnail: blogImageThumbnail,
-                    urlImage: result.url,
-                };
+                    blogImage: {
+                        urlImage: result?.url,
+                        result: result
+                    },
+                    dataDeleteImage: dataDeleteImage
+                }
             }
             
             const blogImage = await this.prismaService.blogImage.create({
                 data: {
-                    blogId: author.blogId,
+                    blogId: checkBlog.blogId,
                     urlImage: result.url,
                 },
             });
@@ -106,7 +101,24 @@ export class CloudinaryService {
             return {
                 success: true,
                 blogImage: blogImage,
-                urlImage: result.url,
+            };
+        } catch (error) {
+            return { success: false, error };
+        }
+    }
+
+    async deleteImageBlog({
+        imageId
+    }: {
+        imageId: string;
+    }) {
+        try {
+            const uploadStream = cloudinary.uploader.destroy(imageId);
+            
+            return {
+                success: true,
+                uploadStream: uploadStream,
+                imageId: imageId
             };
         } catch (error) {
             return { success: false, error };

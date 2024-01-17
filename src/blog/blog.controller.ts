@@ -82,6 +82,12 @@ export class BlogController {
         return this.blogService.findOne(slug);
     }
 
+    @UseGuards(JwtConfirmGuard)
+    @Get('/sidebar/:blogId')
+    getSidebar(@Request() req, @Param('blogId') blogId: number) {
+        return this.blogService.getSidebar({ userId: req?.user.userId || undefined, blogId: blogId });
+    }
+
     @UseGuards(JwtGuard)
     @Delete(':blogId')
     remove(@Param('blogId') blogId: number, @Request() req,) {
@@ -92,5 +98,11 @@ export class BlogController {
     @Patch('/view/:id?')
     increaseViews(@Request() req, @Param('id') blogId: number) {
         return this.blogService.increaseViews(req.user.userId, blogId);
+    }
+    
+    @UseGuards(JwtConfirmGuard)
+    @Patch('/like/:id?')
+    increaseLikes(@Request() req, @Param('id') blogId: number) {
+        return this.blogService.increaseLikes(req.user.userId, blogId);
     }
 }

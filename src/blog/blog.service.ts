@@ -278,7 +278,6 @@ export class BlogService {
 
     async findOne(slug?: string) {
         try {
-            // const cvSlug = slug.substring(0, slug.lastIndexOf('-'));
             const cvBlogId = slug.substring(slug.lastIndexOf('-') + 1);
 
             const blog = await this.prismaService.blog.findUnique({
@@ -323,8 +322,13 @@ export class BlogService {
                     _count: {
                         select: {
                             userViews: true,
-                            userLikes: true,
-                            userSaves: true,
+                            // userLikes: true,
+                            // userSaves: true,
+                            // Comment: {
+                            //     where: {
+                            //         blogId: +cvBlogId
+                            //     }
+                            // }
                         },
                     },
                 },
@@ -333,6 +337,51 @@ export class BlogService {
             return {
                 success: true,
                 blog: blog,
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error,
+            };
+        }
+    }
+
+    async getSidebar({ userId, blogId }: { userId?: number, blogId?: number }) {
+        try {
+            const sidebarBlog = await this.prismaService.blog.findUnique({
+                where: {
+                    blogId: +blogId,
+                },
+                select: {
+                    userLikes: {
+                        take: 1,
+                        where: {
+                            userId: +userId,
+                        }
+                    },
+                    userSaves: {
+                        take: 1,
+                        where: {
+                            userId: +userId
+                        }
+                    },
+                    _count: {
+                        select: {
+                            userLikes: true,
+                            userSaves: true,
+                            Comment: {
+                                where: {
+                                    blogId: +blogId
+                                }
+                            }
+                        },
+                    },
+                },
+            });
+
+            return {
+                success: true,
+                sidebarBlog: sidebarBlog,
             };
         } catch (error) {
             return {
@@ -388,13 +437,13 @@ export class BlogService {
                             rank: true,
                         },
                     },
-                    _count: {
-                        select: {
-                            userViews: true,
-                            userLikes: true,
-                            userSaves: true,
-                        },
-                    },
+                    // _count: {
+                    //     select: {
+                    //         userViews: true,
+                    //         userLikes: true,
+                    //         userSaves: true,
+                    //     },
+                    // },
                 },
             });
 
@@ -507,6 +556,37 @@ export class BlogService {
                 success: true,
             };
         } catch (error) {
+            return {
+                success: false,
+                error: error,
+            };
+        }
+    }
+
+    async increaseLikes(userId: number, blogId: number) {
+        try {
+            const increaseView = await this.prismaService.userLike.create({
+                data: {
+                    userId: +userId,
+                    blogId: +blogId,
+                },
+            });
+
+            return {
+                success: true,
+                increaseView: increaseView
+            };
+        } catch (error) {
+            if(error?.code === "P2002") {
+                await this.prismaService.userLike.delete({
+                    where: {
+                        userId_blogId: {
+                            userId: +userId,
+                            blogId: +blogId
+                        }
+                    },
+                });
+            }
             return {
                 success: false,
                 error: error,
