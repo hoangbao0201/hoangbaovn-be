@@ -563,33 +563,39 @@ export class BlogService {
         }
     }
 
-    async increaseLikes(userId: number, blogId: number) {
+    async actionLike({ type, userId, blogId }: { type: "like" | "unlike", userId: number, blogId: number }) {
         try {
-            const increaseView = await this.prismaService.userLike.create({
-                data: {
-                    userId: +userId,
-                    blogId: +blogId,
-                },
-            });
-
-            return {
-                success: true,
-                increaseView: increaseView
-            };
-        } catch (error) {
-            if(error?.code === "P2002") {
+            if(type === "unlike") {
                 await this.prismaService.userLike.delete({
                     where: {
                         userId_blogId: {
                             userId: +userId,
-                            blogId: +blogId
+                            blogId: +blogId,
                         }
                     },
                 });
+                return {
+                    success: true,
+                    message: "unlike"
+                };
             }
+            else if(type === "like") {
+                await this.prismaService.userLike.create({
+                    data: {
+                        userId: +userId,
+                        blogId: +blogId,
+                    },
+                });
+                return {
+                    success: true,
+                    message: "like"
+                };
+            }
+
+        } catch (error) {
             return {
-                success: false,
-                error: error,
+                success: true,
+                message: type
             };
         }
     }

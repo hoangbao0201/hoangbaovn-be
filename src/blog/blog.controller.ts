@@ -102,7 +102,7 @@ export class BlogController {
     
     @UseGuards(JwtConfirmGuard)
     @Patch('/like/:id?')
-    increaseLikes(@Request() req, @Param('id') blogId: number) {
-        return this.blogService.increaseLikes(req.user.userId, blogId);
+    actionLike(@Query('type') type: "like" | "unlike", @Request() req, @Param('id') blogId: number) {
+        return this.blogService.actionLike({ type, userId: req.user.userId, blogId });
     }
 }
