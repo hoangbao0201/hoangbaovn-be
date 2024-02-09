@@ -98,4 +98,25 @@ export class TagService {
             };
         }
     }
+
+    async findAllSEO() {
+        try {
+            const tags = await this.prismaService.tag.findMany({
+                select: {
+                    tagId: true,
+                    slug: true,
+                    name: true,
+                },
+            });
+            return {
+                success: true,
+                tags: tags || [],
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error,
+            };
+        }
+    }
 }

@@ -14,6 +14,11 @@ export class UserController {
   //   return user;
   // }
 
+  @Get("/seo")
+  findAllSEO() {
+    return this.userService.findAllSEO();
+  }
+
   @Get(':username')
   findOne(@Param('username') username: string) {
     return this.userService.userDetail(username); 

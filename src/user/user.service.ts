@@ -1,5 +1,7 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
+import { isEmail } from 'class-validator';
 
 @Injectable()
 export class UserService {
@@ -51,14 +53,46 @@ export class UserService {
         });
     }
 
-    async findByEmail(email: string) {
+    async findByAccout(accout: string) {
+        let where: Prisma.UserWhereUniqueInput;
+        if(isEmail(accout)) {
+            where = {
+                email: accout
+            }
+        }
+        else {
+            where = {
+                username: accout
+            }
+        }
         return await this.prismaService.user.findUnique({
-            where: {
-                email: email,
-            },
+            where: where,
             include: {
                 role: true
             }
         });
+    }
+
+    async findAllSEO() {
+        try {
+            const users = await this.prismaService.user.findMany({
+                select: {
+                    userId: true,
+                    name: true,
+                    username: true,
+                    createdAt: true,
+                    updatedAt: true,
+                },
+            });
+            return {
+                success: true,
+                users: users || [],
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error,
+            };
+        }
     }
 }

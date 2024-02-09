@@ -2,7 +2,6 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import * as argon from 'argon2';
-import { User } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -43,6 +42,7 @@ export class AuthService {
             });
 
             return {
+                success: true,
                 message: `Regiter user successfully`,
                 users: user,
             };
@@ -69,6 +69,7 @@ export class AuthService {
                 userId: user.userId,
                 username: user.username
             };
+
             return {
                 user,
                 backendTokens: {
@@ -91,14 +92,126 @@ export class AuthService {
         }
     }
 
+    async callbackGithub(req) {
+        try {
+            if (!req.user) {
+                throw new Error();
+            }
+            const user = await this.validateUserBySocial("hoangbao020103");
+            const payload = {
+                userId: user.userId,
+                username: user.username
+            };
+
+            return {
+                user,
+                // reqUser: req.user,
+                backendTokens: {
+                    accessToken: await this.jwtService.signAsync(payload, {
+                        expiresIn: '1h',
+                        secret: this.configService.get('TOKEN_SETCRET'),
+                    }),
+                    refreshToken: await this.jwtService.signAsync(payload, {
+                        expiresIn: '7d',
+                        secret: this.configService.get('REFRESH_TOKEN_SETCRET'),
+                    }),
+                    expiresIn: new Date().setTime(new Date().getTime() + EXPIRE_TIME),
+                },
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error,
+            };
+        }
+    }
+
+    async callbackFacebook(req) {
+        try {
+            if (!req.user) {
+                throw new Error();
+            }
+            const user = await this.validateUserBySocial("hoangbao020103");
+            const payload = {
+                userId: user.userId,
+                username: user.username
+            };
+            
+            return {
+                user,
+                // reqUser: req.user,
+                backendTokens: {
+                    accessToken: await this.jwtService.signAsync(payload, {
+                        expiresIn: '1h',
+                        secret: this.configService.get('TOKEN_SETCRET'),
+                    }),
+                    refreshToken: await this.jwtService.signAsync(payload, {
+                        expiresIn: '7d',
+                        secret: this.configService.get('REFRESH_TOKEN_SETCRET'),
+                    }),
+                    expiresIn: new Date().setTime(new Date().getTime() + EXPIRE_TIME),
+                },
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error,
+            };
+        }
+    }
+
+    async callbackGoogle(req) {
+        try {
+            if (!req.user) {
+                throw new Error();
+            }
+            const user = await this.validateUserBySocial("hoangbao020103@gmail.com");
+            const payload = {
+                userId: user.userId,
+                username: user.username
+            };
+            return {
+                user,
+                reqUser: req?.user,
+                backendTokens: {
+                    accessToken: await this.jwtService.signAsync(payload, {
+                        expiresIn: '1h',
+                        secret: this.configService.get('TOKEN_SETCRET'),
+                    }),
+                    refreshToken: await this.jwtService.signAsync(payload, {
+                        expiresIn: '7d',
+                        secret: this.configService.get('REFRESH_TOKEN_SETCRET'),
+                    }),
+                    expiresIn: new Date().setTime(new Date().getTime() + EXPIRE_TIME),
+                },
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error,
+            };
+        }
+    }
+
+
     async validateUser(dto: LoginDTO) {
-        const user = await this.userService.findByEmail(dto.email);
+        const user = await this.userService.findByAccout(dto.accout);
 
         const checkPassword = await argon.verify(
             user.password,
             dto.password,
         );
         if (user && checkPassword) {
+            delete user.password;
+            return user;
+        }
+        throw new UnauthorizedException();
+    }
+
+    async validateUserBySocial(accout: string) {
+        const user = await this.userService.findByAccout(accout);
+
+        if (user) {
             delete user.password;
             return user;
         }

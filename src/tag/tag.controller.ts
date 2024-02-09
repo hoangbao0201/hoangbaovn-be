@@ -24,6 +24,11 @@ export class TagController {
     return this.tagService.findAll({q, tag, take, skip, sort });
   }
 
+  @Get("/seo")
+  findAllSEO() {
+    return this.tagService.findAllSEO();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.tagService.findOne(+id);
